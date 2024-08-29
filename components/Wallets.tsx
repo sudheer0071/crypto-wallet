@@ -1,18 +1,18 @@
 "use client"
-import {Wallet, HDNodeWallet} from "ethers"
+import {Keypair} from "@solana/web3.js"
 import { useEffect, useState } from "react"
 import Eye, { Copy, EyeIcon, EyeOff } from 'lucide-react'
 import { toast, Toaster } from "sonner"
 import {derivePath} from 'ed25519-hd-key'
+import {Wallet, HDNodeWallet} from "ethers" 
 import nacl from 'tweetnacl'
 import { mnemonicToSeedSync } from "bip39"
 
-export const EthWallet = ()=>{
+export const MainWallet = ({walletType}:{walletType:string})=>{
   interface Key {
     pubKey: string;
     privateKey: any; // Use a more specific type if possible instead of 'any'
   }
-   
   const[numonic, setNumonic] = useState('')
   const [keys, setkeys] = useState<Key[]>([
     {
@@ -25,7 +25,6 @@ export const EthWallet = ()=>{
     const numonic = window.localStorage.getItem('numonic') || ""
     setNumonic(numonic)
   },[])
-    
     
   const copyClipBoard = (text:string)=>{
     navigator.clipboard.writeText(text)
@@ -42,21 +41,31 @@ export const EthWallet = ()=>{
     setIsVisible((prev) => !prev);
   }; 
 
-  const generateWallet = (i:number)=>{
+  
+  const generatSolWallet = (i:number)=>{
     const seed = mnemonicToSeedSync(numonic)
-    const path = `m/44'/60'/${i}'/0'` 
-    const hdnode = HDNodeWallet.fromSeed(seed)
-    const child = hdnode.derivePath(path)
-    // const keypair = Keypair.generate()
-    const secret = child.privateKey
-    const wallet = new Wallet(secret)
-    const public_key =  wallet.address
-    // const secretKey =  keypair.secretKey
-    const privateKey = Buffer.from(secret).toString('base64')
-    // setCurrentIndex( currentIndex + 1)
+    const path = `m/44'/501'/${i}'/0'`
+    const derivedSeed = derivePath(path, seed.toString('hex')).key
+    const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey 
+    const public_key =  Keypair.fromSecretKey(secret).publicKey.toBase58() 
+    const privateKey = Buffer.from(secret).toString('hex') 
     setkeys([...keys, {pubKey:public_key, privateKey:privateKey}])
   }
-
+ 
+const generateEthWallet =  (i:number)=>{
+  const seed = mnemonicToSeedSync(numonic)
+  const path = `m/44'/60'/${i}'/0'` 
+  const hdnode = HDNodeWallet.fromSeed(seed)
+  const child = hdnode.derivePath(path)
+  // const keypair = Keypair.generate()
+  const secret = child.privateKey
+  const wallet = new Wallet(secret)
+  const public_key =  wallet.address
+  // const secretKey =  keypair.secretKey
+  const privateKey = Buffer.from(secret).toString('base64')
+  // setCurrentIndex( currentIndex + 1)
+  setkeys([...keys, {pubKey:public_key, privateKey:privateKey}])
+}
 
   return <div className=" items-center p-10">
       <div onMouseEnter={()=>setShow(true)} className=" cursor-pointer text-3xl font-medium text-center">
@@ -80,11 +89,15 @@ export const EthWallet = ()=>{
        <button
      onClick={()=>{
        setCurrentIndex(currentIndex+1)
-       generateWallet(currentIndex+1)
+       if (walletType=='Solana') {
+         generatSolWallet(currentIndex)
+       } else {
+        generateEthWallet(currentIndex)
+       }
      }}
-     className=" border-2 p-3 rounded-md font-mono hover:bg-white hover:text-black transition-all duration-500">Generate Ethereum wallet</button>
+     className=" border-2 p-3 rounded-md font-mono hover:bg-white hover:text-black transition-all duration-500">Generate {walletType} wallet</button>
     </div>
-        <div className=" w-full mt-24 text-lg">
+        <div className={` pointer-events-none':''} w-full mt-24 text-lg`}>
           {keys.map((key,idx)=>(
             key.pubKey!='' &&
             <div key={idx} className=" mt-10 shadow-lg shadow-slate-500 rounded-md ">
@@ -96,7 +109,7 @@ export const EthWallet = ()=>{
               <p className=" font-bold  text-slate-600 ">
                    Public Key:
                 </p>
-                 <div  onClick={()=>copyClipBoard(key.pubKey)} className=" mt-1 truncate font-mono font-thin text-slate-900 hover:font-semibold">
+                 <div  onClick={()=>copyClipBoard(key.pubKey)} className=" cursor-pointer mt-1 truncate font-mono font-thin text-slate-900 hover:font-semibold">
                    {key.pubKey}
                   </div>
               </div>
@@ -105,7 +118,7 @@ export const EthWallet = ()=>{
                    Private Key:
                 </p>
                 <div className=" flex relative">
-                <div onClick={()=>copyClipBoard(key.privateKey)} className={`mt-1  text-base truncate font-mono font-thin mr-20 text-slate-900 hover:font-semibold`}>
+                <div onClick={()=>copyClipBoard(key.privateKey)} className={` cursor-pointer mt-1  text-base truncate font-mono font-thin mr-20 text-slate-900 hover:font-semibold`}>
         {isVisible&&hideIdx==idx ? key.privateKey : '••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••'}
       </div>
        <div onClick={()=>{handleToggleVisibility();setHideIdx(idx)}} className=" items-center transition-all duration-500 rounded-md flex cursor-pointer absolute right-1 hover:bg-purple-800 p-2">

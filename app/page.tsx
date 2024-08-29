@@ -1,8 +1,7 @@
 "use client"
 import Image from "next/image";
-import { SolWallet } from "../components/SolWallet";
-import { useState } from "react";
-import { EthWallet } from "../components/EthWallet";
+import { MainWallet } from "../components/Wallets";
+import { useState } from "react"; 
 import { generateMnemonic } from 'bip39'
 import { Copy } from "lucide-react";
 import { toast, Toaster } from "sonner";
@@ -48,7 +47,7 @@ export default function Home() {
   </div>
  </div>
   }
- <div className={`${numonic?'':'blur transition-all duration-500'}`}>
+ <div className={`${numonic?'':' pointer-events-none blur transition-all duration-500'}`}>
       <div className=" text-4xl text-center mt-10">
         Choose your wallet
       </div>
@@ -64,7 +63,7 @@ export default function Home() {
       Solana Wallets
      </div>  
      <div>
-      <SolWallet/>  
+      <MainWallet walletType="Solana" />  
      </div>
     </div>
     <div className={`${Wallet=='eth'?'':'hidden'}`}>
@@ -72,7 +71,7 @@ export default function Home() {
       Ethereum Wallets
      </div>  
      <div>
-      <EthWallet/>  
+      <MainWallet walletType="Ethereum"/>  
      </div>
     </div>
    </div>
