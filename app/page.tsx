@@ -40,7 +40,7 @@ export default function Home() {
     Mnemonics
   </div>
 <div className=" md:text-2xl lg:text-2xl grid grid-cols-4 w-full px-10 items-center mt-10 rounded-md">
- {numonic.split(' ').map((nm)=><div className=" bg-zinc-700 cursor-pointer hover:bg-zinc-600 transition-all duration-300 rounded-md p-2 m-2">{nm}</div>)}
+ {numonic.split(' ').map((nm,idx)=><div key={idx} className=" bg-zinc-700 cursor-pointer hover:bg-zinc-600 transition-all duration-300 rounded-md p-2 m-2">{nm}</div>)}
 </div>
 <div onClick={()=>copyClipBoard(numonic)} className=" text-center hover:text-slate-400 transition-all duration-300 mt-2 cursor-pointer">
   copy <Copy className=" inline "/>
