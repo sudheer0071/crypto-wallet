@@ -13,7 +13,7 @@ export const EthWallet = ()=>{
     privateKey: any; // Use a more specific type if possible instead of 'any'
   }
    
-
+  const[numonic, setNumonic] = useState('')
   const [keys, setkeys] = useState<Key[]>([
     {
       pubKey: '',
@@ -21,7 +21,11 @@ export const EthWallet = ()=>{
     },
   ]);
   
-  const numonic = localStorage.getItem('numonic') || ""
+  useEffect(()=>{
+    const numonic = window.localStorage.getItem('numonic') || ""
+    setNumonic(numonic)
+  },[])
+    
     
   const copyClipBoard = (text:string)=>{
     navigator.clipboard.writeText(text)
